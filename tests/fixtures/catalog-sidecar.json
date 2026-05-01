@@ -1,0 +1,8 @@
+{
+  "id": "demo-catalog",
+  "store": "https://example.com/demo.icechunk",
+  "virtual_chunk_model": {
+    "url_prefix": "s3://demo-bucket/",
+    "store_type": "s3"
+  }
+}

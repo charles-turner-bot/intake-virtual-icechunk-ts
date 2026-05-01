@@ -6,13 +6,15 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "check": "tsc -p tsconfig.json --noEmit"
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "icechunk-js": "^0.4.0"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
-    "@types/node": "^22.15.21"
+    "@types/node": "^22.15.21",
+    "vitest": "^3.2.4"
   }
 }

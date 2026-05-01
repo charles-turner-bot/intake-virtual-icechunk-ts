@@ -23,6 +23,8 @@ Not implemented yet:
 
 ```bash
 npm install
+npm test
+npm run build
 ```
 
 ## Use
@@ -41,6 +43,12 @@ console.log(catalog.virtualChunkModel);
 This is a scaffold, not a finished port. Anything that depends on authoritative
 catalog metadata or richer search semantics is intentionally stubbed behind a
 small interface so it can evolve without painting us into a corner.
+
+The test setup currently starts with the cheap stuff first:
+
+- pure catalog helper functions under Vitest
+- in-memory catalog/search semantics tests
+- CI running typecheck, tests, and build on every push/PR
 
 ## Treating XR/Zarr groups like intake catalogs
 

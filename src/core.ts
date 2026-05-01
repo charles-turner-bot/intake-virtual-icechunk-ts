@@ -1,4 +1,5 @@
 import { IcechunkStore, type NodeSnapshot } from "icechunk-js";
+import { extractAttributes, filterEntries, keyToPath } from "./catalog-logic.js";
 import { loadSidecarFromFile, loadSidecarFromUrl, sidecarUrlForStore } from "./sidecar.js";
 import type {
   CatalogEntryMetadata,
@@ -6,27 +7,6 @@ import type {
   CatalogSidecar,
   IcechunkCatalogOptions,
 } from "./types.js";
-
-function matchesQuery(attrs: Record<string, unknown>, query: CatalogSearchQuery): boolean {
-  return Object.entries(query).every(([key, value]) => {
-    const attr = attrs[key];
-    return Array.isArray(value) ? value.includes(attr) : attr === value;
-  });
-}
-
-function extractAttributes(metadata: unknown): Record<string, unknown> {
-  if (metadata && typeof metadata === "object" && "attributes" in metadata) {
-    const attrs = (metadata as { attributes?: unknown }).attributes;
-    if (attrs && typeof attrs === "object" && !Array.isArray(attrs)) {
-      return attrs as Record<string, unknown>;
-    }
-  }
-  return {};
-}
-
-function keyToPath(key: string): string {
-  return key.startsWith("/") ? key : `/${key}`;
-}
 
 export class IcechunkCatalog {
   readonly sidecar: CatalogSidecar;
@@ -98,7 +78,7 @@ export class IcechunkCatalog {
     }
     return new IcechunkCatalog(this.sidecar, {
       storageOptions: this.storageOptions,
-      entries: this.entries.filter((entry) => matchesQuery(entry.attrs, query)),
+      entries: filterEntries(this.entries, query),
     });
   }
 
