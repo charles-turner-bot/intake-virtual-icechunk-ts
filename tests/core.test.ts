@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { IcechunkCatalog } from "../src/core.js";
 import type { CatalogEntryMetadata, CatalogSidecar } from "../src/types.js";
@@ -14,8 +14,8 @@ const sidecar: CatalogSidecar = {
 
 const entries: CatalogEntryMetadata[] = [
   { key: "dataset-a", attrs: { source_id: "BCC-ESM1", experiment_id: "historical" } },
-  { key: "dataset-b", attrs: { source_id: "BCC-ESM1", experiment_id: "ssp585" } },
-  { key: "dataset-c", attrs: { source_id: "ACCESS-CM2", experiment_id: "historical" } },
+  { key: "dataset-b", attrs: { source_id: "BCC-ESM1", experiment_id: "ssp585", members: ["r1i1p1f1"] } },
+  { key: "dataset-c", attrs: { source_id: "ACCESS-CM2", experiment_id: "historical", note: null } },
 ];
 
 describe("IcechunkCatalog search semantics", () => {
@@ -31,8 +31,8 @@ describe("IcechunkCatalog search semantics", () => {
 
     expect(catalog.records()).toEqual([
       { key: "dataset-a", source_id: "BCC-ESM1", experiment_id: "historical" },
-      { key: "dataset-b", source_id: "BCC-ESM1", experiment_id: "ssp585" },
-      { key: "dataset-c", source_id: "ACCESS-CM2", experiment_id: "historical" },
+      { key: "dataset-b", source_id: "BCC-ESM1", experiment_id: "ssp585", members: ["r1i1p1f1"] },
+      { key: "dataset-c", source_id: "ACCESS-CM2", experiment_id: "historical", note: null },
     ]);
     expect(catalog.toRecords()).toEqual(catalog.records());
   });
@@ -45,8 +45,21 @@ describe("IcechunkCatalog search semantics", () => {
     expect(catalog.search({ source_id: "BCC-ESM1", experiment_id: "ssp585" }).keys()).toEqual(["dataset-b"]);
     expect(catalog.search({ source_id: "BCC-ESM1" }).records()).toEqual([
       { key: "dataset-a", source_id: "BCC-ESM1", experiment_id: "historical" },
-      { key: "dataset-b", source_id: "BCC-ESM1", experiment_id: "ssp585" },
+      { key: "dataset-b", source_id: "BCC-ESM1", experiment_id: "ssp585", members: ["r1i1p1f1"] },
     ]);
+  });
+
+  it("returns itself for an empty query", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+
+    expect(catalog.search({})).toBe(catalog);
+  });
+
+  it("returns an empty filtered catalog for unknown query fields", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+
+    expect(catalog.search({ nonsense: "nope" }).keys()).toEqual([]);
+    expect(catalog.search({ nonsense: "nope" }).records()).toEqual([]);
   });
 
   it("supports key lookup helpers", async () => {
@@ -55,5 +68,33 @@ describe("IcechunkCatalog search semantics", () => {
     expect(catalog.has("dataset-a")).toBe(true);
     expect(catalog.has("dataset-z")).toBe(false);
     expect(catalog.getEntry("dataset-c")).toEqual(entries[2]);
+  });
+
+  it("opens a selected group via the store handoff", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+    const getNode = vi.fn().mockReturnValue({ path: "/dataset-a", nodeData: { type: "group" } });
+    catalog.openStore = vi.fn().mockResolvedValue({ getNode } as never);
+
+    await expect(catalog.openGroup("dataset-a")).resolves.toEqual({
+      path: "/dataset-a",
+      nodeData: { type: "group" },
+    });
+    expect(getNode).toHaveBeenCalledWith("/dataset-a");
+  });
+
+  it("throws when openGroup cannot find a group", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+    catalog.openStore = vi.fn().mockResolvedValue({ getNode: vi.fn().mockReturnValue(null) } as never);
+
+    await expect(catalog.openGroup("dataset-missing")).rejects.toThrow("No group entry found for key: dataset-missing");
+  });
+
+  it("throws when openGroup resolves to a non-group node", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+    catalog.openStore = vi.fn().mockResolvedValue({
+      getNode: vi.fn().mockReturnValue({ path: "/dataset-a", nodeData: { type: "array" } }),
+    } as never);
+
+    await expect(catalog.openGroup("dataset-a")).rejects.toThrow("No group entry found for key: dataset-a");
   });
 });

@@ -30,6 +30,7 @@ For local development in this repo:
 ```bash
 npm install
 npm test
+npm run coverage
 npm run build
 ```
 
@@ -57,7 +58,8 @@ The test setup currently starts with the cheap stuff first:
 
 - pure catalog helper functions under Vitest
 - in-memory catalog/search semantics tests
-- CI running typecheck, tests, and build on every push/PR
+- coverage reporting via Vitest
+- CI running typecheck, coverage, and build on every push/PR
 
 The intended catalog skin is deliberately simple: the catalog can expose its
 current view as an array of plain JS objects via `records()` / `toRecords()`,
