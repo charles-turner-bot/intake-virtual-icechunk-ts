@@ -1,7 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { open as openZarr } from "zarrita";
 
 import { IcechunkCatalog } from "../src/core.js";
 import type { CatalogEntryMetadata, CatalogSidecar } from "../src/types.js";
+
+vi.mock("zarrita", () => ({
+  open: vi.fn(),
+}));
 
 const sidecar: CatalogSidecar = {
   id: "demo-catalog",
@@ -19,6 +24,10 @@ const entries: CatalogEntryMetadata[] = [
 ];
 
 describe("IcechunkCatalog search semantics", () => {
+  beforeEach(() => {
+    vi.mocked(openZarr).mockReset();
+  });
+
   it("reuses injected entries when opening from a sidecar file", async () => {
     const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
 
@@ -96,5 +105,54 @@ describe("IcechunkCatalog search semantics", () => {
     } as never);
 
     await expect(catalog.openGroup("dataset-a")).rejects.toThrow("No group entry found for key: dataset-a");
+  });
+
+  it("opens a selected dataset by handing the scoped store to zarrita", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+    const scopedStore = { scoped: true };
+    const group = { kind: "group", path: "/dataset-a" };
+    const store = {
+      getNode: vi.fn().mockReturnValue({ path: "/dataset-a", nodeData: { type: "group" } }),
+      resolve: vi.fn().mockReturnValue(scopedStore),
+    };
+    vi.mocked(openZarr).mockResolvedValue(group as never);
+    catalog.openStore = vi.fn().mockResolvedValue(store as never);
+
+    await expect(catalog.openDataset("dataset-a")).resolves.toBe(group);
+    expect(catalog.openStore).toHaveBeenCalledWith({});
+    expect(store.getNode).toHaveBeenCalledWith("/dataset-a");
+    expect(store.resolve).toHaveBeenCalledWith("/dataset-a");
+    expect(openZarr).toHaveBeenCalledWith(scopedStore, {
+      kind: "group",
+      attrs: undefined,
+      signal: undefined,
+    });
+  });
+
+  it("passes dataset open options through to icechunk-js and zarrita", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+    const signal = new AbortController().signal;
+    const store = {
+      getNode: vi.fn().mockReturnValue({ path: "/dataset-a", nodeData: { type: "group" } }),
+      resolve: vi.fn().mockReturnValue({ scoped: true }),
+    };
+    vi.mocked(openZarr).mockResolvedValue({ kind: "group" } as never);
+    catalog.openStore = vi.fn().mockResolvedValue(store as never);
+
+    await catalog.openDataset("dataset-a", { branch: "dev", attrs: false, signal });
+
+    expect(catalog.openStore).toHaveBeenCalledWith({ branch: "dev", signal });
+    expect(openZarr).toHaveBeenCalledWith({ scoped: true }, { kind: "group", attrs: false, signal });
+  });
+
+  it("throws when openDataset cannot find a group", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+    catalog.openStore = vi.fn().mockResolvedValue({
+      getNode: vi.fn().mockReturnValue({ path: "/dataset-a", nodeData: { type: "array" } }),
+      resolve: vi.fn(),
+    } as never);
+
+    await expect(catalog.openDataset("dataset-a")).rejects.toThrow("No group entry found for key: dataset-a");
+    expect(openZarr).not.toHaveBeenCalled();
   });
 });

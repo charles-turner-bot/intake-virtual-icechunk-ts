@@ -40,12 +40,13 @@
     "prepublishOnly": "npm run check && npm run coverage && npm run build"
   },
   "dependencies": {
-    "icechunk-js": "^0.4.0"
+    "icechunk-js": "^0.4.0",
+    "zarrita": "^0.7.2"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
     "@types/node": "^22.15.21",
-    "vitest": "^3.2.4",
-    "@vitest/coverage-v8": "^3.2.4"
+    "@vitest/coverage-v8": "^3.2.4",
+    "vitest": "^3.2.4"
   }
 }

@@ -1,4 +1,5 @@
-import { IcechunkStore, type NodeSnapshot } from "icechunk-js";
+import { IcechunkStore, type IcechunkStoreOptions, type NodeSnapshot } from "icechunk-js";
+import { open as openZarr, type Group } from "zarrita";
 import { extractAttributes, filterEntries, keyToPath } from "./catalog-logic.js";
 import { loadSidecarFromFile, loadSidecarFromUrl, sidecarUrlForStore } from "./sidecar.js";
 import type {
@@ -8,6 +9,10 @@ import type {
   CatalogSidecar,
   IcechunkCatalogOptions,
 } from "./types.js";
+
+export interface OpenDatasetOptions extends IcechunkStoreOptions {
+  attrs?: boolean;
+}
 
 export class IcechunkCatalog {
   readonly sidecar: CatalogSidecar;
@@ -94,8 +99,8 @@ export class IcechunkCatalog {
     });
   }
 
-  async openStore(options: Record<string, unknown> = {}): Promise<IcechunkStore> {
-    return IcechunkStore.open(this.storeUrl, options as never);
+  async openStore(options: IcechunkStoreOptions = {}): Promise<IcechunkStore> {
+    return IcechunkStore.open(this.storeUrl, options);
   }
 
   async loadEntryMetadata(): Promise<CatalogEntryMetadata[]> {
@@ -113,9 +118,20 @@ export class IcechunkCatalog {
     return node;
   }
 
-  async openDataset(_key: string): Promise<never> {
-    throw new Error(
-      "openDataset() is a stub for now. Entry discovery/search now works by reconstructing from group metadata, but dataset materialisation semantics still need to be designed for TS consumers."
-    );
+  async openDataset(key: string, options: OpenDatasetOptions = {}): Promise<Group<IcechunkStore>> {
+    const { attrs, ...storeOptions } = options;
+    const store = await this.openStore(storeOptions);
+    const path = keyToPath(key);
+    const node = store.getNode(path);
+
+    if (!node || node.nodeData.type !== "group") {
+      throw new Error(`No group entry found for key: ${key}`);
+    }
+
+    return openZarr(store.resolve(node.path), {
+      kind: "group",
+      attrs,
+      signal: options.signal,
+    });
   }
 }
