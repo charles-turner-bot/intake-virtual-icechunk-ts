@@ -1,4 +1,4 @@
-import { IcechunkStore, type NodeSnapshot } from "icechunk-js";
+import { IcechunkStore, type IcechunkStoreOptions, type NodeSnapshot } from "icechunk-js";
 import { extractAttributes, filterEntries, keyToPath } from "./catalog-logic.js";
 import { loadSidecarFromFile, loadSidecarFromUrl, sidecarUrlForStore } from "./sidecar.js";
 import type {
@@ -94,8 +94,8 @@ export class IcechunkCatalog {
     });
   }
 
-  async openStore(options: Record<string, unknown> = {}): Promise<IcechunkStore> {
-    return IcechunkStore.open(this.storeUrl, options as never);
+  async openStore(options: IcechunkStoreOptions = {}): Promise<IcechunkStore> {
+    return IcechunkStore.open(this.storeUrl, options);
   }
 
   async loadEntryMetadata(): Promise<CatalogEntryMetadata[]> {

@@ -43,6 +43,40 @@ npm pack --dry-run
 npm publish --access public
 ```
 
+For GitHub releases, the intended convention is:
+
+- npm version: `0.0.1`
+- git tag: `v0.0.1`
+- GitHub Release: `v0.0.1`
+
+A tag-push workflow is included so future `vX.Y.Z` tags can:
+
+- verify the tag matches `package.json`
+- run typecheck, coverage, and build
+- publish to npm
+- create a GitHub Release
+
+This workflow is configured for **npm trusted publishing** (OIDC), not an
+`NPM_TOKEN` secret.
+
+## Trusted publishing setup
+
+One-time setup on npm:
+
+1. Open the package settings on npmjs.com for `intake-virtual-icechunk-ts`
+2. Find the **Trusted Publisher** section
+3. Add a GitHub Actions trusted publisher with:
+   - **Organization or user:** `charles-turner-bot`
+   - **Repository:** `intake-virtual-icechunk-ts`
+   - **Workflow filename:** `release.yml`
+4. Save it
+
+Notes:
+
+- trusted publishing currently works with **GitHub-hosted runners**
+- npm says this requires **npm CLI 11.5.1+** and **Node 22.14.0+**
+- once configured, GitHub Actions can publish without storing a long-lived npm token
+
 This package is currently versioned as `0.0.1`, i.e. an intentionally early
 prototype release.
 
