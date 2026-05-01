@@ -1,0 +1,18 @@
+{
+  "name": "intake-virtual-icechunk-ts",
+  "version": "0.1.0",
+  "description": "Read-side TypeScript scaffold for an intake-style Icechunk catalog.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "icechunk-js": "^0.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/node": "^22.15.21"
+  }
+}
