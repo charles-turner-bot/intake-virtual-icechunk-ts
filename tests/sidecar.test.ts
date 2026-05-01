@@ -46,6 +46,33 @@ describe("loadSidecarFromFile", () => {
 
     await expect(loadSidecarFromFile(file)).rejects.toThrow();
   });
+
+  it("rejects JSON missing required sidecar fields", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "ivic-ts-"));
+    const file = join(dir, "catalog.json");
+    await writeFile(file, JSON.stringify({ store: "https://example.com/demo.icechunk" }));
+
+    await expect(loadSidecarFromFile(file)).rejects.toThrow(
+      `Invalid catalog sidecar from ${file}: virtual_chunk_model must be an object`,
+    );
+  });
+
+  it("rejects optional object fields with non-object values", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "ivic-ts-"));
+    const file = join(dir, "catalog.json");
+    await writeFile(
+      file,
+      JSON.stringify({
+        store: "https://example.com/demo.icechunk",
+        storage_options: ["not", "an", "object"],
+        virtual_chunk_model: { url_prefix: "s3://bucket/", store_type: "s3" },
+      }),
+    );
+
+    await expect(loadSidecarFromFile(file)).rejects.toThrow(
+      `Invalid catalog sidecar from ${file}: storage_options must be an object`,
+    );
+  });
 });
 
 describe("loadSidecarFromUrl", () => {
@@ -88,6 +115,20 @@ describe("loadSidecarFromUrl", () => {
 
     await expect(loadSidecarFromUrl("https://example.com/missing.json")).rejects.toThrow(
       "Failed to load sidecar from https://example.com/missing.json: 404 Not Found",
+    );
+  });
+
+  it("rejects invalid sidecar JSON from fetch", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ store: 42, virtual_chunk_model: { url_prefix: "s3://bucket/", store_type: "s3" } }),
+      }),
+    );
+
+    await expect(loadSidecarFromUrl("https://example.com/catalog.json")).rejects.toThrow(
+      "Invalid catalog sidecar from https://example.com/catalog.json: store must be a string",
     );
   });
 });
