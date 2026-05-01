@@ -22,6 +22,12 @@ Not implemented yet:
 ## Install
 
 ```bash
+npm install intake-virtual-icechunk-ts
+```
+
+For local development in this repo:
+
+```bash
 npm install
 npm test
 npm run build
@@ -30,7 +36,7 @@ npm run build
 ## Use
 
 ```ts
-import { IcechunkCatalog } from "./dist/index.js";
+import { IcechunkCatalog } from "intake-virtual-icechunk-ts";
 
 const catalog = await IcechunkCatalog.openFromStore("https://example.com/my-catalog.icechunk");
 
