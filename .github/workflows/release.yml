@@ -19,13 +19,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.14.0
           registry-url: https://registry.npmjs.org
           cache: npm
 
-      - name: Upgrade npm for trusted publishing
+      - name: Prepare npm for trusted publishing
         run: |
-          npm install -g npm@latest
+          corepack enable
+          corepack prepare npm@11.5.1 --activate
           node --version
           npm --version
 
