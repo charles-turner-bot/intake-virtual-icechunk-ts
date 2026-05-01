@@ -43,6 +43,15 @@ npm pack --dry-run
 npm publish --access public
 ```
 
+For GitHub releases, the intended convention is:
+
+- npm version: `0.0.1`
+- git tag: `v0.0.1`
+- GitHub Release: `v0.0.1`
+
+A tag-push workflow is included so future `vX.Y.Z` tags can create GitHub
+Releases automatically.
+
 This package is currently versioned as `0.0.1`, i.e. an intentionally early
 prototype release.
 
