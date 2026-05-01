@@ -49,8 +49,15 @@ For GitHub releases, the intended convention is:
 - git tag: `v0.0.1`
 - GitHub Release: `v0.0.1`
 
-A tag-push workflow is included so future `vX.Y.Z` tags can create GitHub
-Releases automatically.
+A tag-push workflow is included so future `vX.Y.Z` tags can:
+
+- verify the tag matches `package.json`
+- run typecheck, coverage, and build
+- publish to npm
+- create a GitHub Release
+
+To make that work, set a repository secret named `NPM_TOKEN` with an npm access
+token that has publish rights for the package.
 
 This package is currently versioned as `0.0.1`, i.e. an intentionally early
 prototype release.
