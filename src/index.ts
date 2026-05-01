@@ -9,3 +9,4 @@ export type {
   IcechunkCatalogOptions,
   VirtualChunkModel,
 } from "./types.js";
+export type { OpenDatasetOptions } from "./core.js";

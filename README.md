@@ -11,6 +11,7 @@ This repo is intentionally narrow:
 - minimal catalog/search facade
 - reconstructing entry metadata from top-level group metadata
 - opening an `IcechunkStore` from sidecar metadata
+- opening selected dataset groups through `icechunk-js` and `zarrita`
 
 Not implemented yet:
 
@@ -88,10 +89,12 @@ import { IcechunkCatalog } from "intake-virtual-icechunk-ts";
 const catalog = await IcechunkCatalog.openFromStore("https://example.com/my-catalog.icechunk");
 const rows = catalog.records();
 const historical = catalog.search({ experiment_id: "historical" }).toRecords();
+const dataset = await catalog.openDataset("dataset-a");
 
 console.log(catalog.storeUrl);
 console.log(rows);
 console.log(historical);
+console.log(dataset.attrs);
 ```
 
 ## Design notes
