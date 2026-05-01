@@ -9,6 +9,7 @@ This repo is intentionally narrow:
 - **read side only**
 - sidecar loading
 - minimal catalog/search facade
+- reconstructing entry metadata from top-level group metadata
 - opening an `IcechunkStore` from sidecar metadata
 
 Not implemented yet:
@@ -76,15 +77,16 @@ have from `intake-esm`:
 - selecting one entry gives you something dataset-like
 - the underlying data can still live in object storage and be read lazily
 
-What is still intentionally unresolved here is **where the authoritative entry
-metadata should live**.
+For this TS version, we are explicitly taking the same path as the current
+Python implementation: **reconstruct entry metadata from top-level group
+metadata on read**.
 
-There are a few viable options:
+That means the catalog layer assumes:
 
-- reconstruct from group metadata
-- persist an explicit catalog index/manifest
-- use a hybrid approach where the sidecar points to richer catalog metadata
+- each top-level group is one logical catalog entry
+- the group's Zarr metadata contains the attributes needed for discovery/search
+- catalogs stay small enough that enumerating groups eagerly is acceptable
 
-For now, this repo keeps that part lightweight and stub-friendly, but the broad
-architecture is: **make groups function like catalog entries, not just raw
-paths in a store**.
+If that assumption stops being true later, this repo can still grow a persisted
+index/manifest path. But for now the architecture is deliberately simple:
+**make groups function like catalog entries, not just raw paths in a store**.
