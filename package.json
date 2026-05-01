@@ -1,7 +1,22 @@
 {
   "name": "intake-virtual-icechunk-ts",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Read-side TypeScript scaffold for an intake-style Icechunk catalog.",
+  "keywords": [
+    "icechunk",
+    "zarr",
+    "catalog",
+    "intake",
+    "typescript"
+  ],
+  "homepage": "https://github.com/charles-turner-bot/intake-virtual-icechunk-ts#readme",
+  "bugs": {
+    "url": "https://github.com/charles-turner-bot/intake-virtual-icechunk-ts/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charles-turner-bot/intake-virtual-icechunk-ts.git"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,7 +36,8 @@
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run check && npm run coverage && npm run build"
   },
   "dependencies": {
     "icechunk-js": "^0.4.0"

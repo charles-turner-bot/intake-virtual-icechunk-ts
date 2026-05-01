@@ -34,6 +34,18 @@ npm run coverage
 npm run build
 ```
 
+## First publish checklist
+
+```bash
+npm login
+npm whoami
+npm pack --dry-run
+npm publish --access public
+```
+
+This package is currently versioned as `0.0.1`, i.e. an intentionally early
+prototype release.
+
 ## Use
 
 ```ts
