@@ -3,6 +3,7 @@ import { extractAttributes, filterEntries, keyToPath } from "./catalog-logic.js"
 import { loadSidecarFromFile, loadSidecarFromUrl, sidecarUrlForStore } from "./sidecar.js";
 import type {
   CatalogEntryMetadata,
+  CatalogRecord,
   CatalogSearchQuery,
   CatalogSidecar,
   IcechunkCatalogOptions,
@@ -70,6 +71,17 @@ export class IcechunkCatalog {
 
   getEntry(key: string): CatalogEntryMetadata | undefined {
     return this.entries.find((entry) => entry.key === key);
+  }
+
+  records(): CatalogRecord[] {
+    return this.entries.map((entry) => ({
+      key: entry.key,
+      ...entry.attrs,
+    }));
+  }
+
+  toRecords(): CatalogRecord[] {
+    return this.records();
   }
 
   search(query: CatalogSearchQuery): IcechunkCatalog {

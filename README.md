@@ -39,9 +39,12 @@ npm run build
 import { IcechunkCatalog } from "intake-virtual-icechunk-ts";
 
 const catalog = await IcechunkCatalog.openFromStore("https://example.com/my-catalog.icechunk");
+const rows = catalog.records();
+const historical = catalog.search({ experiment_id: "historical" }).toRecords();
 
 console.log(catalog.storeUrl);
-console.log(catalog.virtualChunkModel);
+console.log(rows);
+console.log(historical);
 ```
 
 ## Design notes
@@ -55,6 +58,10 @@ The test setup currently starts with the cheap stuff first:
 - pure catalog helper functions under Vitest
 - in-memory catalog/search semantics tests
 - CI running typecheck, tests, and build on every push/PR
+
+The intended catalog skin is deliberately simple: the catalog can expose its
+current view as an array of plain JS objects via `records()` / `toRecords()`,
+which can then be rendered in the browser however you like.
 
 ## Treating XR/Zarr groups like intake catalogs
 

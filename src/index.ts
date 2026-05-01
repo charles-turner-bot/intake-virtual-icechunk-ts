@@ -3,6 +3,7 @@ export { IcechunkCatalog } from "./core.js";
 export { loadSidecarFromFile, loadSidecarFromUrl, sidecarUrlForStore } from "./sidecar.js";
 export type {
   CatalogEntryMetadata,
+  CatalogRecord,
   CatalogSearchQuery,
   CatalogSidecar,
   IcechunkCatalogOptions,

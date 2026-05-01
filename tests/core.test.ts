@@ -26,12 +26,27 @@ describe("IcechunkCatalog search semantics", () => {
     expect(catalog.keys()).toEqual(["dataset-a", "dataset-b", "dataset-c"]);
   });
 
+  it("exposes plain JS records for rendering", async () => {
+    const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
+
+    expect(catalog.records()).toEqual([
+      { key: "dataset-a", source_id: "BCC-ESM1", experiment_id: "historical" },
+      { key: "dataset-b", source_id: "BCC-ESM1", experiment_id: "ssp585" },
+      { key: "dataset-c", source_id: "ACCESS-CM2", experiment_id: "historical" },
+    ]);
+    expect(catalog.toRecords()).toEqual(catalog.records());
+  });
+
   it("filters entries with search()", async () => {
     const catalog = await IcechunkCatalog.openFromSidecarFile("tests/fixtures/catalog-sidecar.json", { entries });
 
     expect(catalog.search({ source_id: "BCC-ESM1" }).keys()).toEqual(["dataset-a", "dataset-b"]);
     expect(catalog.search({ experiment_id: "historical" }).keys()).toEqual(["dataset-a", "dataset-c"]);
     expect(catalog.search({ source_id: "BCC-ESM1", experiment_id: "ssp585" }).keys()).toEqual(["dataset-b"]);
+    expect(catalog.search({ source_id: "BCC-ESM1" }).records()).toEqual([
+      { key: "dataset-a", source_id: "BCC-ESM1", experiment_id: "historical" },
+      { key: "dataset-b", source_id: "BCC-ESM1", experiment_id: "ssp585" },
+    ]);
   });
 
   it("supports key lookup helpers", async () => {

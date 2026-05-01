@@ -21,6 +21,10 @@ export interface CatalogEntryMetadata {
   attrs: Record<string, unknown>;
 }
 
+export interface CatalogRecord extends Record<string, unknown> {
+  key: string;
+}
+
 export interface CatalogSearchQuery {
   [key: string]: unknown;
 }
